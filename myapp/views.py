@@ -483,26 +483,77 @@ def display_taetigkeiten2_data(request, project_name):
     # Set up paths
     base_dir = os.path.dirname(os.path.abspath(__file__))
     data_csv_path = os.path.join(base_dir, 'data', 'Enriched_Tätigkeiten_Data.csv')  
+    data2_csv_path = os.path.join(settings.BASE_DIR, 'myapp', 'data', 'Data2.csv')  # Pfad zu Data2.csv
     
     try:
-        # Load the CSV data and replace spaces in column names with underscores
-        df = pd.read_csv(data_csv_path, encoding='utf-8-sig')
-        df.columns = df.columns.str.replace(' ', '_')
-
-        # Filter the data for the selected project
-        project_data = df[df['Project'] == project_name]
-
-        # Group by 'DIN_Ebene1' und weitere Aggregationen je nach Bedarf
-        grouped_data = project_data.groupby(['DIN_Ebene1', 'DIN_Ebene1_Beschreibung'], as_index=False).sum(numeric_only=True)
-
+        # Lade Data2.csv für die Summenberechnung
+        df_data2 = pd.read_csv(data2_csv_path, encoding='utf-8-sig')
+        df_data2.columns = df_data2.columns.str.strip()
+        df_data2.rename(columns={
+            'prav. Materialkosten': 'prav_Materialkosten',
+            'prav. Personalkosten': 'prav_Personalkosten',
+            'korr. Materialkosten': 'korr_Materialkosten',
+            'korr. Personalkosten': 'korr_Personalkosten'
+        }, inplace=True)
+        
+        # Filtere Data2.csv für das ausgewählte Projekt
+        project_data2 = df_data2[df_data2['Project'].str.strip() == project_name].copy()
+        
+        if project_data2.empty:
+            return HttpResponse(f"Das Projekt '{project_name}' wurde in Data2.csv nicht gefunden oder enthält keine Daten.", status=404)
+        
+        # Berechne die Summen aus Data2.csv
+        total_cost_sum = project_data2['prav_Materialkosten'].fillna(0).sum() + \
+                         project_data2['prav_Personalkosten'].fillna(0).sum() + \
+                         project_data2['korr_Materialkosten'].fillna(0).sum() + \
+                         project_data2['korr_Personalkosten'].fillna(0).sum()
+        preventive_cost_sum = project_data2['prav_Materialkosten'].fillna(0).sum() + \
+                              project_data2['prav_Personalkosten'].fillna(0).sum()
+        corrective_cost_sum = project_data2['korr_Materialkosten'].fillna(0).sum() + \
+                              project_data2['korr_Personalkosten'].fillna(0).sum()
+        personal_sum = project_data2['prav_Personalkosten'].fillna(0).sum() + \
+                       project_data2['korr_Personalkosten'].fillna(0).sum()
+        material_sum = project_data2['prav_Materialkosten'].fillna(0).sum() + \
+                       project_data2['korr_Materialkosten'].fillna(0).sum()
+        
+        # Lade Enriched_Tätigkeiten_Data.csv für die detaillierte Tabelle
+        df_taetigkeiten = pd.read_csv(data_csv_path, encoding='utf-8-sig')
+        df_taetigkeiten.columns = df_taetigkeiten.columns.str.replace(' ', '_')
+        
+        # Überprüfe, ob alle erforderlichen Spalten vorhanden sind
+        required_columns = [
+            'Project', 'DIN_Ebene1', 'DIN_Ebene1_Beschreibung', 
+            'Inspektion', 'Wartung', 'Zustandsermittlung',
+            'Revision', 'Tausch', 'Betriebsprüfung', 'Betriebsservice',
+            'Vorbereitung', 'Nachbereitung', 'Reparatur_am_Objekt', 'Gesamtkosten'
+        ]
+        missing_columns = [col for col in required_columns if col not in df_taetigkeiten.columns]
+        if missing_columns:
+            raise ValueError(f"Fehlende Spalten in Enriched_Tätigkeiten_Data.csv: {', '.join(missing_columns)}")
+        
+        # Filtere Enriched_Tätigkeiten_Data.csv für das ausgewählte Projekt
+        project_taetigkeiten = df_taetigkeiten[df_taetigkeiten['Project'] == project_name].copy()
+        
+        if project_taetigkeiten.empty:
+            return HttpResponse(f"Das Projekt '{project_name}' wurde in Enriched_Tätigkeiten_Data.csv nicht gefunden oder enthält keine Daten.", status=404)
+        
+        # Gruppiere die Daten für die Tabelle
+        grouped_data = project_taetigkeiten.groupby(['DIN_Ebene1', 'DIN_Ebene1_Beschreibung'], as_index=False).sum(numeric_only=True)
+        project_data_dict = grouped_data.to_dict(orient='records')
+        
         # Bestimme das entsprechende Bild basierend auf project_name
         image_url = project_images.get(project_name, "https://via.placeholder.com/150")  # Standardbild-URL
 
-        # Pass the grouped data to das neue Template
+        # Kontext vorbereiten
         context = {
             'project_name': project_name,
-            'project_data': grouped_data.to_dict(orient='records'),
-            'image_url': image_url,  # Füge image_url zum Kontext hinzu
+            'project_data': project_data_dict,
+            'image_url': image_url,
+            'total_cost_sum': total_cost_sum,
+            'preventive_cost_sum': preventive_cost_sum,
+            'corrective_cost_sum': corrective_cost_sum,
+            'material_sum': material_sum,
+            'personal_sum': personal_sum,
         }
 
     except Exception as e:
@@ -512,8 +563,12 @@ def display_taetigkeiten2_data(request, project_name):
         context = {
             'project_name': project_name,
             'project_data': [],
-            'image_url': image_url,  # Füge image_url zum Kontext hinzu
+            'image_url': image_url,
+            'total_cost_sum': 0,
+            'preventive_cost_sum': 0,
+            'corrective_cost_sum': 0,
+            'material_sum': 0,
+            'personal_sum': 0,
         }
 
     return render(request, 'lcc-taetigkeiten2.html', context)
-
