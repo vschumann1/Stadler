@@ -8,9 +8,9 @@
     <title>LCC-Kosten pro Fahrzeug</title>
     <!-- Importing Google Fonts for Icons and Poppins Font -->
     <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
     <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
     <style>
         /* Importing Google font - Poppins */
         @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
@@ -211,6 +211,76 @@
             overflow-y: auto;
         }
 
+        /* Small Box Container - Added */
+        .small-box-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px; /* Abstand nach unten */
+            padding: 10px;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Card Header */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .card-header .material-symbols-outlined {
+            font-size: 32px;
+            color: #084A9A;
+            transition: color 0.3s ease;
+        }
+
+        .card:hover .card-header .material-symbols-outlined {
+            color: #FFD700;
+        }
+
+        .card-header h3 {
+            font-size: 1.2em;
+            color: #084A9A;
+            font-weight: 600;
+        }
+
+        /* Card Body */
+        .card-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 60px;
+        }
+
+        .card-body .sum {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #FFBD00;
+            transition: color 0.3s ease;
+        }
+
+        .card:hover .card-body .sum {
+            color: #084A9A;
+        }
+
         /* Section Header */
         .section-header {
             font-size: 1.4em;
@@ -223,23 +293,27 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center; /* Flex alignment */
-            margin-bottom: 20px;
+            margin-bottom: 20px; /* Abstand nach unten */
         }
 
         /* Switch Button Styling */
+        .switch-buttons {
+            display: flex;
+            margin-left: auto; /* Push the buttons to the right */
+            gap: 10px; /* Space between buttons */
+        }
+
         .switch-button {
             display: inline-flex;
             align-items: center;
             background-color: #084A9A;
             color: #FFFFFF;
             padding: 10px 20px;
-            font-size: 1em;
+            font-size: 0.8em;
             font-weight: 500;
             text-decoration: none;
             border-radius: 8px;
             transition: background-color 0.3s, transform 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-left: auto; /* Push to the right */
             cursor: pointer;
         }
         
@@ -315,6 +389,7 @@
             background-color: #DDEEFF;
             font-weight: 600;
             transition: background-color 0.3s ease;
+            cursor: pointer;
         }
 
         .main-row:hover {
@@ -356,11 +431,18 @@
         .toggle-icon {
             vertical-align: middle;
             margin-right: 8px;
-            transition: transform 0.3s ease;
+            font-size: 1.2em;
+            color: #0B3F75;
+            cursor: pointer;
         }
 
         /* Responsive Anpassungen */
         @media (max-width: 1024px) {
+            .small-box-container {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(4, auto);
+            }
+
             .section-header {
                 font-size: 1.3em;
                 padding: 8px 16px;
@@ -473,7 +555,7 @@
             const isHidden = subRows[0].classList.contains('hidden');
 
             subRows.forEach(row => {
-                row.classList.toggle('hidden');
+                row.classList.toggle("hidden");
                 row.setAttribute('aria-hidden', isHidden ? 'false' : 'true');
             });
 
@@ -553,19 +635,83 @@
     <div class="main-container">
         <div class="content">
 
-            <!-- Section Header mit Switch-Button rechts ausgerichtet -->
-            <div class="section-header">
-                LCC-Kosten nach Baugruppen und Tätigkeiten
-                <a href="{% url 'project_details' project_name=project_name %}" class="switch-button">
-                    <span class="icon-circle">
-                        <span class="material-symbols-outlined">swap_horiz</span>
-                    </span>
-                    Wechsel zur Baugruppenansicht
-                </a>
+            <!-- Small Box Container - Added -->
+            <div class="small-box-container">
+                <!-- LCC-Gesamtkosten -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-symbols-outlined">euro</span>
+                        <h3>LCC-Gesamtkosten</h3>
+                    </div>
+                    <div class="card-body">
+                        <span class="sum">{{ total_cost_sum|floatformat:0|intcomma }} €</span>
+                    </div>
+                </div>
+
+                <!-- LCC-Präventiv -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-symbols-outlined">security</span>
+                        <h3>LCC-Präventiv</h3>
+                    </div>
+                    <div class="card-body">
+                        <span class="sum">{{ preventive_cost_sum|floatformat:0|intcomma }} €</span>
+                    </div>
+                </div>
+
+                <!-- LCC-Korrektiv -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-symbols-outlined">build</span>
+                        <h3>LCC-Korrektiv</h3>
+                    </div>
+                    <div class="card-body">
+                        <span class="sum">{{ corrective_cost_sum|floatformat:0|intcomma }} €</span>
+                    </div>
+                </div>
+                <!-- LCC-Material -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-symbols-outlined">inventory</span>
+                        <h3>LCC-Material</h3>
+                    </div>
+                    <div class="card-body">
+                        <span class="sum">{{ material_sum|floatformat:0|intcomma }} €</span>
+                    </div>
+                </div>
+                <!-- LCC-Personal -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-symbols-outlined">person</span>
+                        <h3>LCC-Personal</h3>
+                    </div>
+                    <div class="card-body">
+                        <span class="sum">{{ personal_sum|floatformat:0|intcomma }} €</span>
+                    </div>
+                    
+                </div>
+
+
+                <!-- Weitere Boxen können hier hinzugefügt werden, falls die ursprünglichen 10 nicht vollständig sind -->
             </div>
 
-            <!-- Suchleiste entfernt -->
+            <!-- Section Header mit Switch-Buttons rechts ausgerichtet -->
+            <div class="section-header">
+                LCC-Kosten nach Baugruppen entlang korrektiver und präventiver Personal- und Materialkosten
+                <div class="switch-buttons">
+                    <!-- First Switch Button -->
+                    <!-- deleted -->
 
+                    <!-- Second Switch Button -->
+                    <a href="{% url 'project_details' project_name=project_name %}" class="switch-button">
+                        <span class="icon-circle">
+                            <span class="material-symbols-outlined">swap_horiz</span>
+                        </span>
+                        Wechsel zur Baugruppenansicht
+                    </a>
+                </div>
+            </div>
+                    
             <table class="cost-table" aria-label="LCC-Kosten Tabelle">
                 <thead>
                     <tr>
