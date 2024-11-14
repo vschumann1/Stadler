@@ -1,0 +1,705 @@
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCC-Kosten pro Fahrzeug</title>
+    <!-- Importing Google Fonts for Icons and Poppins Font -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
+    <style>
+        /* Importing Google font - Poppins */
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: "Poppins", sans-serif;
+        }
+
+        body {
+          background-color: #F0F4FF;
+          color: #0B3F75;
+          display: flex;
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 85px;
+          display: flex;
+          flex-direction: column;
+          background: #0B3F75;
+          padding: 25px 20px;
+          transition: width 0.4s ease;
+          z-index: 1000;
+          overflow: hidden;
+        }
+
+        .sidebar.open {
+          width: 260px;
+        }
+
+        .sidebar .sidebar-header {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+        }
+
+        .sidebar .sidebar-header .menu-icon {
+          font-size: 2rem;
+          color: #fff;
+        }
+
+        .sidebar .sidebar-header h2 {
+          color: #fff;
+          font-size: 1.25rem;
+          font-weight: 600;
+          white-space: nowrap;
+          margin-left: 23px;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-header h2 {
+          opacity: 1;
+        }
+
+        .sidebar-links {
+          list-style: none;
+          margin-top: 20px;
+          flex-grow: 1;
+          overflow-y: auto;
+          scrollbar-width: none;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .sidebar-links::-webkit-scrollbar {
+          display: none;
+        }
+
+        .sidebar-links h4 {
+          color: #fff;
+          font-weight: 500;
+          white-space: nowrap;
+          margin: 10px 0;
+          position: relative;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-links h4 {
+          opacity: 1;
+        }
+
+        .sidebar-links .menu-separator {
+          position: absolute;
+          left: 0;
+          top: 50%;
+          width: 100%;
+          height: 1px;
+          background: #4F52BA;
+          transform-origin: right;
+          transition: transform 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-links .menu-separator {
+          transform: scaleX(0);
+        }
+
+        .sidebar-links li {
+          margin: 5px 0;
+        }
+
+        .sidebar-links li a {
+          display: flex;
+          align-items: center;
+          gap: 0 20px;
+          color: #fff;
+          font-weight: 500;
+          white-space: nowrap;
+          padding: 15px 10px;
+          text-decoration: none;
+          border-radius: 4px;
+          transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .sidebar-links li a:hover, .sidebar-links li a:focus {
+          color: #161a2d;
+          background: #fff;
+          outline: none;
+        }
+
+        .sidebar-links li a.active {
+          background-color: #FFBD00;
+          color: #161a2d;
+          font-weight: 600;
+        }
+
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 85px; /* Initial sidebar width */
+            right: 0;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background-color: #FFFFFF;
+            border-bottom: 2px solid #D3D3D3;
+            z-index: 999;
+            transition: left 0.4s ease;
+        }
+        .header img.logo {
+          height: 50px;
+          width: auto;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h1 {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+      }
+        .sidebar.open ~ .header {
+            left: 260px; /* Expanded sidebar width */
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #0B3F75;
+            margin: 0;
+        }
+
+        .header img {
+            height: 30px;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 100px 20px 20px 20px;
+            margin-left: 85px;
+            transition: margin-left 0.4s ease;
+        }
+
+        .sidebar.open ~ .main-container {
+            margin-left: 260px;
+        }
+
+        /* Content Styles */
+        .content {
+            flex: 1;
+            background-color: #F2F2F2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+
+        /* Section Header */
+        .section-header {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #0B3F75;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #E6E6E6, #FFFFFF);
+            border-left: 5px solid #FFD700;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center; /* Flex alignment */
+            margin-bottom: 20px;
+        }
+
+        /* Switch Button Styling */
+        .switch-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: #084A9A;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-left: auto; /* Push to the right */
+            cursor: pointer;
+        }
+        
+        .switch-button:hover {
+            background-color: #FFBD00;
+            color: #084A9A;
+            transform: translateY(-3px);
+        }
+        
+        .switch-button .icon-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #FFFFFF;
+            color: #084A9A;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+            transition: background-color 0.3s, color 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .switch-button:hover .icon-circle {
+            background-color: #084A9A;
+            color: #FFBD00;
+        }
+        
+        .switch-button .material-symbols-outlined {
+            font-size: 24px;
+        }
+
+        /* Hidden Class to Toggle Visibility */
+        .hidden {
+            display: none;
+        }
+
+        /* Cost Table Styling */
+        .cost-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #F9F9F9;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .cost-table th, .cost-table td {
+            border: 1px solid #D3D3D3;
+            padding: 12px 15px;
+            text-align: left;
+            color: #0B3F75;
+            font-size: 1em;
+        }
+
+        .cost-table th {
+            background-color: #E6E6E6;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        /* Zebra Striping */
+        .cost-table tbody tr:nth-child(even) {
+            background-color: #FAFAFA;
+        }
+
+        /* Main and Sub Rows Styling */
+        .main-row {
+            background-color: #DDEEFF;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .main-row:hover {
+            background-color: #CCE5FF;
+        }
+
+        .sub-data-row {
+            background-color: #FFFFFF;
+            padding-left: 20px;
+            transition: background-color 0.3s ease, padding-left 0.3s ease;
+        }
+
+        .sub-data-row td {
+            border: none;
+            padding: 8px 15px;
+        }
+
+        /* Button for Toggle */
+        .toggle-button {
+            display: inline-flex;
+            align-items: center;
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 0;
+            font: inherit;
+        }
+
+        .toggle-button:hover .toggle-icon {
+            color: #FFBD00;
+        }
+
+        .toggle-button:focus {
+            outline: 2px solid #FFBD00;
+        }
+
+        /* Icons for Expand/Collapse */
+        .toggle-icon {
+            vertical-align: middle;
+            margin-right: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Responsive Anpassungen */
+        @media (max-width: 1024px) {
+            .section-header {
+                font-size: 1.3em;
+                padding: 8px 16px;
+            }
+
+            .switch-button {
+                padding: 8px 16px;
+                font-size: 0.95em;
+            }
+
+            .cost-table th, .cost-table td {
+                padding: 10px 12px;
+                font-size: 0.95em;
+            }
+
+            .toggle-icon {
+                margin-right: 6px;
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+                gap: 10px;
+            }
+
+            .header img {
+                height: 25px;
+            }
+
+            .cost-table th, .cost-table td {
+                padding: 8px 10px;
+                font-size: 0.9em;
+            }
+
+            .switch-button {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            .section-header {
+                font-size: 1.2em;
+                padding: 8px 16px;
+            }
+
+            .sub-data-row {
+                padding-left: 15px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 0 10px;
+            }
+
+            .main-container {
+                padding: 100px 10px 20px 10px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .cost-table th, .cost-table td {
+                padding: 6px 8px;
+                font-size: 0.85em;
+            }
+
+            .switch-button {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+
+            .section-header {
+                font-size: 1em;
+                padding: 6px 12px;
+            }
+
+            .sub-data-row {
+                padding-left: 10px;
+            }
+        }
+
+        /* Accessibility Focus Styles */
+        .toggle-button:focus {
+            outline: 2px solid #FFBD00;
+            background-color: #CCE5FF;
+        }
+
+        /* Align the last column ("Wert") to the right */
+        .cost-table th:last-child,
+        .cost-table td:last-child {
+            text-align: right;
+        }
+
+    </style>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Ein-/Ausklappen der Unterzeilen
+        function toggleSubRows(dinEben1) {
+            const subRows = document.querySelectorAll(`.sub-${dinEben1}`);
+            const mainRow = document.querySelector(`.main-row[data-din="${dinEben1}"]`);
+            const toggleButton = mainRow.querySelector('.toggle-button');
+            const toggleIcon = toggleButton.querySelector('.toggle-icon');
+            const isHidden = subRows[0].classList.contains('hidden');
+
+            subRows.forEach(row => {
+                row.classList.toggle('hidden');
+                row.setAttribute('aria-hidden', isHidden ? 'false' : 'true');
+            });
+
+            // Update toggle icon
+            toggleIcon.textContent = isHidden ? 'remove' : 'add';
+
+            // Update ARIA attribute
+            toggleButton.setAttribute('aria-expanded', !isHidden);
+        }
+
+        // Initialisierung: Alle Unterzeilen standardmäßig verstecken
+        document.addEventListener("DOMContentLoaded", () => {
+            const subRows = document.querySelectorAll("[class^='sub-']");
+            subRows.forEach(row => row.classList.add('hidden'));
+
+            // Event Listener für Tastaturinteraktionen auf den Toggle-Buttons
+            document.querySelectorAll('.toggle-button').forEach(button => {
+                button.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const dinEben1 = this.getAttribute('aria-controls').replace('sub-', '');
+                        toggleSubRows(dinEben1);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar open" aria-label="Sidebar Navigation">
+        <div class="sidebar-header" onclick="toggleSidebar()" role="button" tabindex="0" aria-expanded="true" aria-controls="sidebar-links">
+            <span class="material-symbols-outlined menu-icon" aria-hidden="true">menu</span>
+            <h2>Menu</h2>
+        </div>
+        <ul class="sidebar-links" id="sidebar-links">
+            <!-- "Zurück zum Start" Link unterhalb des "Menu" Headers -->
+            <li class="zurueck-zum-start">
+                <a href="/">
+                    <span class="material-symbols-outlined" aria-hidden="true">home</span>Zurück zum Start
+                </a>
+            </li>
+            <!-- "Main Menu" Header -->
+            <h4>
+                <span>Main Menu</span>
+                <div class="menu-separator"></div>
+            </h4>
+            <li>
+                <a href="{% url 'project_details' project_name %}" {% if request.path == project_name %}class="active"{% endif %}>
+                    <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>LCC-Kosten
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'benchmarking' project_name %}" {% if request.path == '/benchmarking/' %}class="active"{% endif %}>
+                    <span class="material-symbols-outlined" aria-hidden="true">assessment</span>LCC-Benchmarking
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'workflow' project_name %}" {% if request.path == '/workflow/' %}class="active"{% endif %}>
+                    <span class="material-symbols-outlined" aria-hidden="true">description</span>Workflow-Dokumentation
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>
+            LCC-Kosten für {{ project_name }} pro Fahrzeug 
+            <img src="{{ image_url }}" alt="{{ project_name }} Logo" class="logo">
+        </h1>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Stadler_logo.svg/1200px-Stadler_logo.svg.png" alt="Stadler Logo">
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="content">
+
+            <!-- Section Header mit Switch-Button rechts ausgerichtet -->
+            <div class="section-header">
+                LCC-Kosten nach Baugruppen und Tätigkeiten
+                <a href="{% url 'project_details' project_name=project_name %}" class="switch-button">
+                    <span class="icon-circle">
+                        <span class="material-symbols-outlined">swap_horiz</span>
+                    </span>
+                    Wechsel zur Baugruppenansicht
+                </a>
+            </div>
+
+            <!-- Suchleiste entfernt -->
+
+            <table class="cost-table" aria-label="LCC-Kosten Tabelle">
+                <thead>
+                    <tr>
+                        <th>DIN Ebene 1</th>
+                        <th>Beschreibung</th>
+                        <th>Tätigkeit</th>
+                        <th>Wert</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in project_data %}
+                    <!-- Hauptzeile für DIN Ebene 1 -->
+                    <tr class="main-row" data-din="{{ row.DIN_Ebene1 }}" aria-expanded="false" aria-controls="sub-{{ row.DIN_Ebene1 }}">
+                        <td>{{ row.DIN_Ebene1 }}</td>
+                        <td>{{ row.DIN_Ebene1_Beschreibung }}</td>
+                        <td>
+                            <button class="toggle-button" aria-expanded="false" aria-controls="sub-{{ row.DIN_Ebene1 }}" onclick="toggleSubRows('{{ row.DIN_Ebene1 }}')">
+                                <span class="material-symbols-outlined toggle-icon">add</span>
+                                Gesamtkosten
+                            </button>
+                        </td>
+                        <td>{{ row.Gesamtkosten|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <!-- Unterzeilen für Tätigkeiten -->
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" id="sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Inspektion</td>
+                        <td>{{ row.Inspektion|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Wartung</td>
+                        <td>{{ row.Wartung|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Zustandsermittlung</td>
+                        <td>{{ row.Zustandsermittlung|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Revision</td>
+                        <td>{{ row.Revision|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Tausch</td>
+                        <td>{{ row.Tausch|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Betriebsprüfung</td>
+                        <td>{{ row.Betriebsprüfung|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Betriebsservice</td>
+                        <td>{{ row.Betriebsservice|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Vorbereitung</td>
+                        <td>{{ row.Vorbereitung|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Nachbereitung</td>
+                        <td>{{ row.Nachbereitung|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    <tr class="sub-data-row sub-{{ row.DIN_Ebene1 }}" aria-hidden="true">
+                        <td></td>
+                        <td></td>
+                        <td>Reparatur am Objekt</td>
+                        <td>{{ row.Reparatur_am_Objekt|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Ein-/Ausklappen der Unterzeilen
+        function toggleSubRows(dinEben1) {
+            const subRows = document.querySelectorAll(`.sub-${dinEben1}`);
+            const mainRow = document.querySelector(`.main-row[data-din="${dinEben1}"]`);
+            const toggleButton = mainRow.querySelector('.toggle-button');
+            const toggleIcon = toggleButton.querySelector('.toggle-icon');
+            const isHidden = subRows[0].classList.contains('hidden');
+
+            subRows.forEach(row => {
+                row.classList.toggle("hidden");
+                row.setAttribute('aria-hidden', isHidden ? 'false' : 'true');
+            });
+
+            // Update toggle icon
+            toggleIcon.textContent = isHidden ? 'remove' : 'add';
+
+            // Update ARIA attribute
+            toggleButton.setAttribute('aria-expanded', !isHidden);
+        }
+
+        // Initialisierung: Alle Unterzeilen standardmäßig verstecken
+        document.addEventListener("DOMContentLoaded", () => {
+            const subRows = document.querySelectorAll("[class^='sub-']");
+            subRows.forEach(row => row.classList.add('hidden'));
+
+            // Event Listener für Tastaturinteraktionen auf den Toggle-Buttons
+            document.querySelectorAll('.toggle-button').forEach(button => {
+                button.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const dinEben1 = this.getAttribute('aria-controls').replace('sub-', '');
+                        toggleSubRows(dinEben1);
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

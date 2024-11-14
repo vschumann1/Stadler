@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow-Dokumentation pro Fahrzeug</title>
+    <!-- Importieren von Google Fonts -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+    <style>
+        /* Globale Stile */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F0F4FF;
+            color: #0B3F75;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Stile */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 85px;
+            display: flex;
+            flex-direction: column;
+            background: #0B3F75;
+            padding: 25px 20px;
+            transition: width 0.4s ease;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .sidebar.open {
+            width: 260px;
+        }
+
+        .sidebar .sidebar-header {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .sidebar .sidebar-header .menu-icon {
+            font-size: 2rem;
+            color: #fff;
+        }
+
+        .sidebar .sidebar-header h2 {
+            color: #fff;
+            font-size: 1.25rem;
+            font-weight: 600;
+            white-space: nowrap;
+            margin-left: 23px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-header h2 {
+            opacity: 1;
+        }
+
+        .sidebar-links {
+            list-style: none;
+            margin-top: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            scrollbar-width: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-links::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sidebar-links h4 {
+            color: #fff;
+            font-weight: 500;
+            white-space: nowrap;
+            margin: 10px 0;
+            position: relative;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-links h4 {
+            opacity: 1;
+        }
+
+        .sidebar-links .menu-separator {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #4F52BA;
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-links .menu-separator {
+            transform: scaleX(0);
+        }
+
+        .sidebar-links li {
+            margin: 5px 0;
+        }
+
+        .sidebar-links li a {
+            display: flex;
+            align-items: center;
+            gap: 0 20px;
+            color: #fff;
+            font-weight: 500;
+            white-space: nowrap;
+            padding: 15px 10px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .sidebar-links li a:hover {
+            color: #161a2d;
+            background: #fff;
+        }
+
+        .sidebar-links li a.active {
+            background-color: #FFBD00;
+            color: #161a2d;
+        }
+
+        /* Entfernte CSS-Regel für .bottom-link, da nicht mehr benötigt */
+
+        /* Header Stile */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 85px; /* Initiale Sidebar-Breite */
+            right: 0;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background-color: #FFFFFF;
+            border-bottom: 2px solid #D3D3D3;
+            z-index: 999;
+            transition: left 0.4s ease;
+        }
+        .header img.logo {
+            height: 50px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+
+        }
+        .sidebar.open ~ .header {
+            left: 260px; /* Erweiterte Sidebar-Breite */
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #0B3F75;
+            margin: 0;
+        }
+
+        .header img {
+            height: 30px;
+        }
+
+        /* Hauptcontainer */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 100px 20px 20px 20px;
+            margin-left: 85px;
+            transition: margin-left 0.4s ease;
+        }
+
+        .sidebar.open ~ .main-container {
+            margin-left: 260px;
+        }
+
+        /* Inhaltsstile */
+        .content {
+            flex: 1;
+            background-color: #FFFFFF;
+            padding: 30px;
+            border-radius: 12px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Workflow Tabellenstile */
+        .workflow-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .workflow-table th, .workflow-table td {
+            padding: 15px;
+            text-align: center;
+            color: #0B3F75;
+            border-bottom: 1px solid #D3D3D3;
+            font-size: 1em;
+        }
+
+        .workflow-table th {
+            background: #0B3F75;
+            color: #FFFFFF;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .workflow-table td {
+            background-color: #F9FAFB;
+        }
+
+        /* Hover-Effekt für Reihen */
+        .workflow-table tr:hover td:not(.highlight) {
+            background-color: #E6F0FA;
+        }
+
+        /* Checkbox-Zellen-Styling */
+        .workflow-table .checkbox-cell {
+            background-color: #F9FAFB;
+        }
+
+        .checkbox-container {
+            display: flex;
+            flex-direction: column; /* Vertikale Anordnung */
+            align-items: center;
+        }
+        .timestamp {
+            margin-top: 5px; /* Abstand zwischen Checkbox und Timestamp */
+            font-size: 0.9em; /* Optional: Schriftgröße für den Timestamp anpassen */
+            color: #0B3F75; /* Farbthema anpassen */
+        }
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #0B3F75;
+        }
+
+        /* Highlight-Effekt für Reihen mit allen Checkboxen aktiviert */
+        .highlight td {
+            background-color: #E6FFE6 !important; /* Hellgrün */
+            transition: background-color 0.5s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header img {
+                height: 25px;
+            }
+
+            .workflow-table th, .workflow-table td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            .checkbox-container input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 0 10px;
+            }
+
+            .main-container {
+                padding: 100px 10px 20px 10px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .workflow-table th, .workflow-table td {
+                padding: 8px;
+                font-size: 0.85em;
+            }
+
+            .workflow-table th {
+                font-size: 0.9em;
+            }
+
+            .checkbox-container input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        /* Zusätzliche Stile für Save- und Edit-Buttons */
+        .save-button, .edit-button {
+            margin-left: 5px;
+            padding: 5px 10px;
+            background-color: #0B3F75;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .save-button:hover, .edit-button:hover {
+            background-color: #0A2F5B;
+        }
+
+        /* Stile für Verantwortlicher-Container */
+        .verantwortlicher-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .verantwortlicher-container span {
+            display: inline-block;
+            width: 90%;
+            padding: 5px;
+            border: 1px solid #D3D3D3;
+            border-radius: 4px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar open"> <!-- Klasse "open" hinzugefügt -->
+    <div class="sidebar-header" onclick="toggleSidebar()">
+        <span class="material-symbols-outlined menu-icon">menu</span>
+        <h2>Menu</h2>
+    </div>
+    <ul class="sidebar-links">
+        <!-- "Zurück zum Start" Link unterhalb des "Menu" Headers -->
+        <li>
+            <a href="/">
+                <span class="material-symbols-outlined">home</span>Zurück zum Start
+            </a>
+        </li>
+        <!-- "Main Menu" Header -->
+        <h4>
+            <span>Main Menu</span>
+            <div class="menu-separator"></div>
+        </h4>
+        <li>
+            <a href="{% url 'project_details' project_name %}" {% if request.path == project_name %}class="active"{% endif %}>
+                <span class="material-symbols-outlined">dashboard</span>LCC-Kosten
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'benchmarking' project_name %}" {% if request.path == '/benchmarking/' %}class="active"{% endif %}>
+                <span class="material-symbols-outlined">assessment</span>LCC-Benchmarking
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'workflow' project_name %}" {% if request.path == '/workflow/' %}class="active"{% endif %}>
+                <span class="material-symbols-outlined">description</span>Workflow-Dokumentation
+            </a>
+        </li>
+        <!-- Entfernte "Zurück zum Start" Link mit Klasse "bottom-link" -->
+    </ul>
+</aside>
+
+<!-- Header -->
+<div class="header">
+    <h1>Workflow-Dokumentation
+        <img src="{{ image_url }}" alt="{{ project_name }} Logo" class="logo"> <!-- Angepasste Zeile -->
+    </h1>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Stadler_logo.svg/1200px-Stadler_logo.svg.png" alt="Stadler Logo">
+</div>
+
+<!-- Hauptinhalt -->
+<div class="main-container">
+    <div class="content">
+        <table class="workflow-table">
+            <thead>
+                <tr>
+                    <th>Baugruppe</th>
+                    <th>Lieferant</th>
+                    <th>Verantwortlicher</th>
+                    <th>Eingegangen</th>
+                    <th>Geprüft</th>
+                    <th>Freigegeben</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in workflow_data %}
+                <tr>
+                    <td>{{ entry.Baugruppe }}</td>
+                    <td>{{ entry.Supplier }}</td>
+                    <td>
+                        <div class="verantwortlicher-container">
+                            <input type="text" class="verantwortlicher-input" value="{{ entry.Verantwortlicher }}" style="width: 80%; padding: 5px; border: 1px solid #D3D3D3; border-radius: 4px;">
+                            <button class="save-button">Speichern</button>
+                        </div>
+                    </td>
+                    <td class="checkbox-cell">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="status-checkbox">
+                            <span class="timestamp"></span> <!-- Timestamp-Element unterhalb der Checkbox -->
+                        </div>
+                    </td>
+                    <td class="checkbox-cell">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="status-checkbox">
+                            <span class="timestamp"></span> <!-- Timestamp-Element unterhalb der Checkbox -->
+                        </div>
+                    </td>
+                    <td class="checkbox-cell">
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="status-checkbox">
+                            <span class="timestamp"></span> <!-- Timestamp-Element unterhalb der Checkbox -->
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('open');
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const rows = document.querySelectorAll(".workflow-table tbody tr");
+
+        rows.forEach(row => {
+            const checkboxes = row.querySelectorAll(".status-checkbox");
+
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.addEventListener("change", () => {
+                    const timestampElement = checkbox.nextElementSibling;
+
+                    if (checkbox.checked) {
+                        // Aktuellen Timestamp einfügen, wenn Checkbox aktiviert wird
+                        const now = new Date();
+                        const timestamp = now.toLocaleString('de-DE', { 
+                            year: 'numeric', 
+                            month: '2-digit', 
+                            day: '2-digit', 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        }); // Format: DD.MM.YYYY HH:MM
+
+                        timestampElement.textContent = timestamp; // Timestamp-Text unterhalb der Checkbox setzen
+                    } else {
+                        // Timestamp löschen, wenn Checkbox deaktiviert wird
+                        timestampElement.textContent = "";
+                    }
+
+                    // Zeile hervorheben, wenn alle Checkboxen aktiviert sind
+                    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                    row.classList.toggle("highlight", allChecked);
+                });
+            });
+        });
+
+        // Handler für "Speichern"-Buttons in der Verantwortlicher-Spalte
+        const saveButtons = document.querySelectorAll(".save-button");
+
+        saveButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                const container = button.parentElement;
+                const input = container.querySelector(".verantwortlicher-input");
+                const newValue = input.value.trim();
+
+                if (newValue !== "") {
+                    // Eingabefeld und Speichern-Button durch statischen Text und Edit-Button ersetzen
+                    container.innerHTML = `
+                        <span>${newValue}</span>
+                        <button class="edit-button">Bearbeiten</button>
+                    `;
+                } else {
+                    alert("Bitte geben Sie einen Verantwortlichen ein.");
+                }
+
+                // Nach dem Ersetzen die neuen Edit-Buttons initialisieren
+                initializeEditButtons();
+            });
+        });
+
+        // Handler für Enter-Taste in den Eingabefeldern
+        const inputs = document.querySelectorAll(".verantwortlicher-input");
+
+        inputs.forEach(input => {
+            input.addEventListener("keypress", (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Formularabsendung verhindern, falls innerhalb eines Formulars
+                    const container = input.parentElement;
+                    const button = container.querySelector(".save-button");
+                    button.click();
+                }
+            });
+        });
+
+        // Funktion zur Initialisierung der Edit-Buttons
+        function initializeEditButtons() {
+            const editButtons = document.querySelectorAll(".edit-button");
+
+            editButtons.forEach(button => {
+                button.addEventListener("click", () => {
+                    const container = button.parentElement;
+                    const currentValue = container.querySelector("span").textContent;
+
+                    // Eingabefeld und Speichern-Button wieder hinzufügen
+                    container.innerHTML = `
+                        <input type="text" class="verantwortlicher-input" value="${currentValue}" style="width: 80%; padding: 5px; border: 1px solid #D3D3D3; border-radius: 4px;">
+                        <button class="save-button">Speichern</button>
+                    `;
+
+                    // Neue Save-Buttons initialisieren
+                    const newSaveButtons = container.querySelectorAll(".save-button");
+                    newSaveButtons.forEach(saveButton => {
+                        saveButton.addEventListener("click", () => {
+                            const newInput = container.querySelector(".verantwortlicher-input");
+                            const updatedValue = newInput.value.trim();
+
+                            if (updatedValue !== "") {
+                                container.innerHTML = `
+                                    <span>${updatedValue}</span>
+                                    <button class="edit-button">Bearbeiten</button>
+                                `;
+                                initializeEditButtons(); // Rekursive Initialisierung
+                            } else {
+                                alert("Bitte geben Sie einen Verantwortlichen ein.");
+                            }
+                        });
+                    });
+
+                    // Handler für Enter-Taste in den neuen Eingabefeldern
+                    const newInputs = container.querySelectorAll(".verantwortlicher-input");
+                    newInputs.forEach(newInput => {
+                        newInput.addEventListener("keypress", (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const saveBtn = container.querySelector(".save-button");
+                                saveBtn.click();
+                            }
+                        });
+                    });
+                });
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

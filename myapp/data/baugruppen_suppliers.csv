@@ -1,0 +1,46 @@
+﻿Baugruppe,Beschreibung,Supplier
+B,Fahrzeugkasten,CAF
+B,Fahrzeugkasten,Bombardier
+B,Fahrzeugkasten,Hitachi Rail
+C,Fahrzeugausbau,CAF
+C,Fahrzeugausbau,Hyundai Rotem
+C,Fahrzeugausbau,Talgo
+D,Fahrzeuginnenrichtung,Compin Group
+D,Fahrzeuginnenrichtung,Kiel Group
+D,Fahrzeuginnenrichtung,FISA Fabbrica
+E,Fahrwerk,CAF
+E,Fahrwerk,Talgo
+E,Fahrwerk,Kawasaki Heavy Industries
+F,Energieanlage,Schneider Electric
+F,Energieanlage,Vossloh
+F,Energieanlage,Medcom
+G,Steuerungsanlage für Fahrbetrieb,Bombardier
+G,Steuerungsanlage für Fahrbetrieb,CAF Signalling
+H,Hilfsbetriebsanlage,Knorr-Bremse
+H,Hilfsbetriebsanlage,Parker Hannifin
+J,Überwachungs- und Sicherheitseinrichtungen,Bombardier
+J,Überwachungs- und Sicherheitseinrichtungen,CAF Rail
+K,Beleuchtung,Osram
+K,Beleuchtung,Teknoware
+K,Beleuchtung,Lumibird
+L,Klimatisierung,Mitsubishi Electric
+L,Klimatisierung,Carrier
+M,Nebenbetriebsanlage,CAF
+M,Nebenbetriebsanlage,Mitsubishi Electric
+N,"Türen, Einstiege",Ultimate
+N,"Türen, Einstiege",Bode
+N,"Türen, Einstiege",Knorr-Bremse
+N,"Türen, Einstiege",Fuji Electric
+N,"Türen, Einstiege",Kangni
+P,Informationseinrichtungen,Hitachi Rail
+P,Informationseinrichtungen,Teleste Corporation
+Q,Pneumatik / Hydraulik,Parker Hannifin
+Q,Pneumatik / Hydraulik,Festo
+R,Bremse,Westinghouse Air Brake Technologies
+R,Bremse,Nabtesco
+S,Fahrzeugverbindungseinrichtungen,Dellner Couplers
+S,Fahrzeugverbindungseinrichtungen,CAF
+T,Tragsysteme,Voith
+T,Tragsysteme,Schaeffler Group
+U,Elektrische Leitungsverlegung,Prysmian Group
+U,Elektrische Leitungsverlegung,TE Connectivity

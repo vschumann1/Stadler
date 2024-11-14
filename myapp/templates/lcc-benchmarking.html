@@ -1,0 +1,627 @@
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCC-Benchmarking</title>
+    <!-- Importing Google Fonts for Icons and Poppins Font -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
+    <style>
+        /* Importing Google font - Poppins */
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: "Poppins", sans-serif;
+        }
+
+        body {
+          background-color: #F0F4FF;
+          color: #0B3F75;
+          display: flex;
+          height: 100vh;
+          overflow: hidden;
+        }
+
+
+
+        /* Sidebar Styles */
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 85px;
+          display: flex;
+          flex-direction: column;
+          background: #0B3F75;
+          padding: 25px 20px;
+          transition: width 0.4s ease;
+          z-index: 1000;
+          overflow: hidden;
+        }
+
+        .sidebar.open {
+          width: 260px;
+        }
+
+        .sidebar .sidebar-header {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+        }
+
+        .sidebar .sidebar-header .menu-icon {
+          font-size: 2rem;
+          color: #fff;
+        }
+
+        .sidebar .sidebar-header h2 {
+          color: #fff;
+          font-size: 1.25rem;
+          font-weight: 600;
+          white-space: nowrap;
+          margin-left: 23px;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-header h2 {
+          opacity: 1;
+        }
+
+        .sidebar-links {
+          list-style: none;
+          margin-top: 20px;
+          flex-grow: 1;
+          overflow-y: auto;
+          scrollbar-width: none;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .sidebar-links::-webkit-scrollbar {
+          display: none;
+        }
+
+        .sidebar-links h4 {
+          color: #fff;
+          font-weight: 500;
+          white-space: nowrap;
+          margin: 10px 0;
+          position: relative;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-links h4 {
+          opacity: 1;
+        }
+
+        .sidebar-links .menu-separator {
+          position: absolute;
+          left: 0;
+          top: 50%;
+          width: 100%;
+          height: 1px;
+          background: #4F52BA;
+          transform-origin: right;
+          transition: transform 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-links .menu-separator {
+          transform: scaleX(0);
+        }
+
+        .sidebar-links li {
+          margin: 5px 0;
+        }
+
+        .sidebar-links li a {
+          display: flex;
+          align-items: center;
+          gap: 0 20px;
+          color: #fff;
+          font-weight: 500;
+          white-space: nowrap;
+          padding: 15px 10px;
+          text-decoration: none;
+          border-radius: 4px;
+          transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .sidebar-links li a:hover {
+          color: #161a2d;
+          background: #fff;
+        }
+
+        .sidebar-links li a.active {
+          background-color: #FFBD00;
+          color: #161a2d;
+        }
+
+        /* Positionierung von "Zurück zum Start" unterhalb des "Menu" Headers und oberhalb des "Main Menu" */
+        .sidebar-links li.zurueck-zum-start {
+          margin-bottom: 10px; /* Optional: Abstand nach unten */
+        }
+
+        /* Entfernte CSS-Regel für .bottom-link, da nicht mehr benötigt */
+        /* .bottom-link {
+            margin-top: auto;
+        } */
+
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 85px; /* Initial sidebar width */
+            right: 0;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background-color: #FFFFFF;
+            border-bottom: 2px solid #D3D3D3;
+            z-index: 999;
+            transition: left 0.4s ease;
+        }
+        .header img.logo {
+            height: 50px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+
+        }
+        .sidebar.open ~ .header {
+            left: 260px; /* Expanded sidebar width */
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #0B3F75;
+            margin: 0;
+        }
+
+        .header img {
+            height: 30px;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 100px 20px 20px 20px;
+            margin-left: 85px;
+            transition: margin-left 0.4s ease;
+        }
+
+        .sidebar.open ~ .main-container {
+            margin-left: 260px;
+        }
+
+        /* Content Styles */
+        .content {
+            flex: 1;
+            background-color: #F2F2F2;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        /* Data Table Styling */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #F9F9F9;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #D3D3D3;
+            padding: 10px;
+            text-align: center;
+            color: #0B3F75;
+        }
+
+        .data-table th {
+            background-color: #E6E6E6;
+            font-weight: bold;
+        }
+
+        .highlight-overlay {
+            position: absolute;
+            border: 2px solid green;
+            background-color: transparent;
+            pointer-events: none;
+        }
+
+        .label-box {
+            position: absolute;
+            top: 0px;
+            left: 0;
+            width: 100%;
+            background-color: green;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            padding: 5px 0;
+            font-size: 1em; 
+            box-sizing: border-box;
+        }
+
+        /* Enhanced Dropdown Styling */
+        label {
+            font-size: 1.1em;
+            color: #0B3F75;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        select {
+            width: 200px;
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #0B3F75;
+            border-radius: 5px;
+            background-color: #FFFFFF;
+            color: #0B3F75;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%230B3F75' d='M2 0L0 2h4z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px;
+            transition: border-color 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        select:hover {
+            border-color: #084A9A;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #084A9A;
+        }
+
+        .export-button-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .export-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 20px;
+            font-size: 1em;
+            color: #FFFFFF;
+            background-color: #0B3F75;
+            border: 2px solid #0B3F75;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .export-button:hover {
+            background-color: #084A9A;
+            color: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .export-button:active {
+            transform: translateY(0px);
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .export-button-icon {
+            margin-right: 8px;
+            font-size: 1.3em;
+            vertical-align: middle;
+        }
+        
+        .export-button:focus {
+            outline: none;
+            box-shadow: 0px 0px 5px 2px rgba(11, 63, 117, 0.5);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+
+
+    <!-- Updated Sidebar -->
+    <aside class="sidebar open"> <!-- Klasse "open" hinzugefügt -->
+        <div class="sidebar-header" onclick="toggleSidebar()">
+            <span class="material-symbols-outlined menu-icon">menu</span>
+            <h2>Menu</h2>
+        </div>
+        <ul class="sidebar-links">
+            <!-- "Zurück zum Start" Link unterhalb des "Menu" Headers -->
+            <li class="zurueck-zum-start">
+                <a href="/">
+                    <span class="material-symbols-outlined">home</span>Zurück zum Start
+                </a>
+            </li>
+            <!-- "Main Menu" Header -->
+            <h4>
+                <span>Main Menu</span>
+                <div class="menu-separator"></div>
+            </h4>
+            <li>
+                <a href="{% url 'project_details' project_name %}" {% if request.path == project_name %}class="active"{% endif %}>
+                    <span class="material-symbols-outlined">dashboard</span>LCC-Kosten
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'benchmarking' project_name %}" {% if request.path == '/benchmarking/' %}class="active"{% endif %}>
+                    <span class="material-symbols-outlined">assessment</span>LCC-Benchmarking
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'workflow' project_name %}" {% if request.path == '/workflow/' %}class="active"{% endif %}>
+                    <span class="material-symbols-outlined">description</span>Workflow-Dokumentation
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>LCC-Benchmarking pro Fahrzeug 
+            <img src="{{ image_url }}" alt="{{ project_name }} Logo" class="logo"> <!-- Angepasste Zeile -->
+        </h1>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Stadler_logo.svg/1200px-Stadler_logo.svg.png" alt="Stadler Logo">
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="content">
+            <label for="din-filter">Filtern nach Baugruppe :</label>
+            <select id="din-filter">
+                <option value="all" {% if not selected_din %}selected{% endif %}>All</option>
+                {% for din_value in din_values %}
+                    <option value="{{ din_value }}" {% if selected_din == din_value %}selected{% endif %}>{{ din_value }}</option>
+                {% endfor %}
+            </select>
+            
+            <div class="chart-container">
+                <canvas id="benchmarkChart"></canvas>
+                <!-- Highlight overlays will be added dynamically -->
+            </div>
+    
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Kostenkategorie</th>
+                        {% for project in cost_data %}
+                            <th>{{ project.Project }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Präv. Materialkosten</td>
+                        {% for project in cost_data %}
+                            <td>{{ project.prav_Materialkosten|floatformat:0|intcomma }} €</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td>Präv. Personalkosten</td>
+                        {% for project in cost_data %}
+                            <td>{{ project.prav_Personalkosten|floatformat:0|intcomma }} €</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td>Korr. Materialkosten</td>
+                        {% for project in cost_data %}
+                            <td>{{ project.korr_Materialkosten|floatformat:0|intcomma }} €</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td>Korr. Personalkosten</td>
+                        {% for project in cost_data %}
+                            <td>{{ project.korr_Personalkosten|floatformat:0|intcomma }} €</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="export-button-container">
+                <a href="{% url 'export_csv' project_name selected_din|default:'all' %}" class="export-button" aria-label="Download CSV">
+                    <svg class="export-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2v13M19 12l-7 7-7-7" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    CSV Export
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        function toggleRows(level) {
+            const rows = document.querySelectorAll(`.level-${level}`);
+            const icon = document.getElementById(`icon-${level}`);
+            
+            rows.forEach(row => row.classList.toggle("hidden"));
+            
+            // Toggle between "+" and "-"
+            icon.textContent = icon.textContent === "+" ? "-" : "+";
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        const initialCostData = {{ cost_data|safe }};
+
+        document.addEventListener("DOMContentLoaded", function () {
+            initializeChart(initialCostData);
+        });
+
+        document.getElementById("din-filter").addEventListener("change", function() {
+            const selectedValue = this.value;
+            const currentPath = window.location.pathname.split('/');
+            if (selectedValue === "all") {
+                window.location.href = `/benchmarking/${currentPath[2]}/`;
+            } else {
+                window.location.href = `/benchmarking/${currentPath[2]}/${encodeURIComponent(selectedValue)}/`;
+            }
+        });
+
+        function initializeChart(costData) {
+            const projectLabels = costData.map(project => project.Project);
+            const dataValues = [
+                costData.map(project => parseFloat(project.prav_Materialkosten)),
+                costData.map(project => parseFloat(project.prav_Personalkosten)),
+                costData.map(project => parseFloat(project.korr_Materialkosten)),
+                costData.map(project => parseFloat(project.korr_Personalkosten)),
+            ];
+            const categories = ['Präv. Materialkosten', 'Präv. Personalkosten', 'Korr. Materialkosten', 'Korr. Personalkosten'];
+
+            const ctx = document.getElementById('benchmarkChart').getContext('2d');
+            window.benchmarkChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: projectLabels,
+                    datasets: categories.map((category, index) => ({
+                        label: category,
+                        data: dataValues[index],
+                        backgroundColor: `rgba(11, 63, 117, ${0.2 + index * 0.2})`
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { 
+                            display: true, 
+                            text: 'LCC-Benchmarking - Vergleich der Projekte für ausgewählte Baugruppe',
+                            font: { size: 20 },
+                            padding: { top: 20, bottom: 30 }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true }
+                    },
+                    animation: {
+                        onComplete: function() {
+                            addOverlays();
+                        }
+                    }
+                }
+            });
+        }
+
+        function addOverlays() {
+            // Remove existing overlays to prevent duplicates
+            document.querySelectorAll('.chart-container .highlight-overlay').forEach(el => el.remove());
+
+            // Overlay for "Selektiertes Angebot" on the first bar
+            const chartArea = window.benchmarkChart.chartArea;
+            const firstBar = window.benchmarkChart.getDatasetMeta(0).data[0];
+            if (firstBar) {
+                const overlaySelektiertes = document.createElement('div');
+                overlaySelektiertes.classList.add('highlight-overlay');
+                overlaySelektiertes.style.left = `${firstBar.x - firstBar.width / 2}px`;
+                overlaySelektiertes.style.width = `${firstBar.width}px`;
+                overlaySelektiertes.style.top = `${chartArea.top}px`;
+                overlaySelektiertes.style.height = `${chartArea.bottom - chartArea.top}px`;
+                overlaySelektiertes.style.borderColor = 'green';
+
+                const labelBoxSelektiertes = document.createElement('div');
+                labelBoxSelektiertes.classList.add('label-box');
+                labelBoxSelektiertes.textContent = "Selektiertes Angebot";
+                labelBoxSelektiertes.style.backgroundColor = 'green';
+
+                overlaySelektiertes.appendChild(labelBoxSelektiertes);
+                document.querySelector('.chart-container').appendChild(overlaySelektiertes);
+            }
+
+            // Overlay for "Weitere Lieferangebote" (2nd to 3rd bars)
+            const secondBar = window.benchmarkChart.getDatasetMeta(0).data[1];
+            const thirdBar = window.benchmarkChart.getDatasetMeta(0).data[2];
+            if (secondBar && thirdBar) {
+                const overlayWeitere = document.createElement('div');
+                overlayWeitere.classList.add('highlight-overlay');
+                overlayWeitere.style.left = `${secondBar.x - secondBar.width / 2}px`;
+                overlayWeitere.style.width = `${(thirdBar.x + thirdBar.width / 2) - (secondBar.x - secondBar.width / 2)}px`;
+                overlayWeitere.style.top = `${chartArea.top}px`;
+                overlayWeitere.style.height = `${chartArea.bottom - chartArea.top}px`;
+                overlayWeitere.style.borderColor = '#006587';
+
+                const labelBoxWeitere = document.createElement('div');
+                labelBoxWeitere.classList.add('label-box');
+                labelBoxWeitere.textContent = "Weitere Lieferangebote";
+                labelBoxWeitere.style.backgroundColor = '#006587';
+
+                overlayWeitere.appendChild(labelBoxWeitere);
+                document.querySelector('.chart-container').appendChild(overlayWeitere);
+            }
+
+            // Overlay for "Referenzen" (4th to 8th bars)
+            const fourthBar = window.benchmarkChart.getDatasetMeta(0).data[3];
+            const lastBarIndex = window.benchmarkChart.getDatasetMeta(0).data.length - 1;
+            const lastBar = window.benchmarkChart.getDatasetMeta(0).data[lastBarIndex];
+            if (fourthBar && lastBar && lastBarIndex >= 3) {
+                const overlayReferenzen = document.createElement('div');
+                overlayReferenzen.classList.add('highlight-overlay');
+                overlayReferenzen.style.left = `${fourthBar.x - fourthBar.width / 2}px`;
+                overlayReferenzen.style.width = `${(lastBar.x + lastBar.width / 2) - (fourthBar.x - fourthBar.width / 2)}px`;
+                overlayReferenzen.style.top = `${chartArea.top}px`;
+                overlayReferenzen.style.height = `${chartArea.bottom - chartArea.top}px`;
+                overlayReferenzen.style.borderColor = '#FFCD01';
+
+                const labelBoxReferenzen = document.createElement('div');
+                labelBoxReferenzen.classList.add('label-box');
+                labelBoxReferenzen.textContent = "Referenzen";
+                labelBoxReferenzen.style.backgroundColor = '#FFCD01';
+                labelBoxReferenzen.style.color = '#0B3F75';
+
+                overlayReferenzen.appendChild(labelBoxReferenzen);
+                document.querySelector('.chart-container').appendChild(overlayReferenzen);
+            }
+        }
+    </script>
+
+</body>
+</html>

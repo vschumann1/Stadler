@@ -1,0 +1,531 @@
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCC-Kosten</title>
+    <!-- Importing Google Fonts for Icons and Poppins Font -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
+    <style>
+        /* Importing Google font - Poppins */
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+        /* CSS Variables for Consistent Styling */
+        :root {
+            --primary-color: #0B3F75;
+            --secondary-color: #FFBD00;
+            --background-color: #F0F4FF;
+            --table-header-bg: #E6E6E6;
+            --table-row-hover: #CCE5FF;
+            --button-bg: #084A9A;
+            --button-hover-bg: #FFBD00;
+            --button-text-color: #FFFFFF;
+            --button-hover-text-color: #084A9A;
+            --border-color: #D3D3D3;
+            --text-color: #0B3F75;
+            --white-color: #FFFFFF;
+        }
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: "Poppins", sans-serif;
+        }
+
+        body {
+          background-color: var(--background-color);
+          color: var(--text-color);
+          display: flex;
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 85px;
+          display: flex;
+          flex-direction: column;
+          background: var(--primary-color);
+          padding: 25px 20px;
+          transition: width 0.4s ease;
+          z-index: 1000;
+          overflow: hidden;
+        }
+
+        .sidebar.open {
+          width: 260px;
+        }
+
+        .sidebar .sidebar-header {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+        }
+
+        .sidebar .sidebar-header .menu-icon {
+          font-size: 2rem;
+          color: var(--white-color);
+        }
+
+        .sidebar .sidebar-header h2 {
+          color: var(--white-color);
+          font-size: 1.25rem;
+          font-weight: 600;
+          white-space: nowrap;
+          margin-left: 23px;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-header h2 {
+          opacity: 1;
+        }
+
+        .sidebar-links {
+          list-style: none;
+          margin-top: 20px;
+          flex-grow: 1;
+          overflow-y: auto;
+          scrollbar-width: none;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .sidebar-links::-webkit-scrollbar {
+          display: none;
+        }
+
+        .sidebar-links h4 {
+          color: var(--white-color);
+          font-weight: 500;
+          white-space: nowrap;
+          margin: 10px 0;
+          position: relative;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-links h4 {
+          opacity: 1;
+        }
+
+        .sidebar-links .menu-separator {
+          position: absolute;
+          left: 0;
+          top: 50%;
+          width: 100%;
+          height: 1px;
+          background: #4F52BA;
+          transform-origin: right;
+          transition: transform 0.3s ease;
+        }
+
+        .sidebar.open .sidebar-links .menu-separator {
+          transform: scaleX(0);
+        }
+
+        .sidebar-links li {
+          margin: 5px 0;
+        }
+
+        .sidebar-links li a {
+          display: flex;
+          align-items: center;
+          gap: 0 20px;
+          color: var(--white-color);
+          font-weight: 500;
+          white-space: nowrap;
+          padding: 15px 10px;
+          text-decoration: none;
+          border-radius: 4px;
+          transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .sidebar-links li a:hover, .sidebar-links li a:focus {
+          color: #161a2d;
+          background: var(--white-color);
+          outline: none;
+        }
+
+        .sidebar-links li a.active {
+          background-color: var(--secondary-color);
+          color: #161a2d;
+          font-weight: 600;
+        }
+
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 85px; /* Initial sidebar width */
+            right: 0;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background-color: var(--white-color);
+            border-bottom: 2px solid var(--border-color);
+            z-index: 999;
+            transition: left 0.4s ease;
+        }
+        .header img.logo {
+          height: 50px;
+          width: auto;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h1 {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          font-size: 2em;
+          color: var(--primary-color);
+          margin: 0;
+      }
+
+        .header img {
+            height: 30px;
+        }
+
+        .sidebar.open ~ .header {
+            left: 260px; /* Expanded sidebar width */
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 100px 20px 20px 20px;
+            margin-left: 85px;
+            transition: margin-left 0.4s ease;
+        }
+
+        .sidebar.open ~ .main-container {
+            margin-left: 260px;
+        }
+
+        /* Content Styles */
+        .content {
+            flex: 1;
+            background-color: var(--white-color);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Section Header */
+        .section-header {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: var(--primary-color);
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #E6E6E6, #FFFFFF);
+            border-left: 5px solid var(--secondary-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center; /* Flex alignment */
+            margin-bottom: 20px;
+        }
+
+        /* Switch Button Styling */
+        .switch-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--button-bg);
+            color: var(--button-text-color);
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-left: auto; /* Push to the right */
+            cursor: pointer;
+        }
+        
+        .switch-button:hover {
+            background-color: var(--button-hover-bg);
+            color: var(--button-hover-text-color);
+            transform: translateY(-3px);
+        }
+        
+        .switch-button .icon-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--white-color);
+            color: var(--button-bg);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+            transition: background-color 0.3s, color 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .switch-button:hover .icon-circle {
+            background-color: var(--button-bg);
+            color: var(--secondary-color);
+        }
+        
+        .switch-button .material-symbols-outlined {
+            font-size: 24px;
+        }
+
+        /* Cost Table Styling */
+        .cost-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--white-color);
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .cost-table th, .cost-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: center;
+            color: var(--text-color);
+            font-size: 1em;
+        }
+
+        .cost-table th {
+            background-color: var(--table-header-bg);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        /* Zebra Striping */
+        .cost-table tbody tr:nth-child(even) {
+            background-color: #FAFAFA;
+        }
+
+        /* Hover Effects */
+        .cost-table tbody tr:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .section-header {
+                font-size: 1.3em;
+                padding: 8px 16px;
+            }
+
+            .switch-button {
+                padding: 8px 16px;
+                font-size: 0.95em;
+            }
+
+            .cost-table th, .cost-table td {
+                padding: 10px 12px;
+                font-size: 0.95em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+                gap: 10px;
+            }
+
+            .header img {
+                height: 25px;
+            }
+
+            .cost-table th, .cost-table td {
+                padding: 8px 10px;
+                font-size: 0.9em;
+            }
+
+            .switch-button {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            .section-header {
+                font-size: 1.2em;
+                padding: 8px 16px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 0 10px;
+            }
+
+            .main-container {
+                padding: 100px 10px 20px 10px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .cost-table th, .cost-table td {
+                padding: 6px 8px;
+                font-size: 0.85em;
+            }
+
+            .switch-button {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+
+            .section-header {
+                font-size: 1em;
+                padding: 6px 12px;
+            }
+        }
+
+        /* Accessibility Focus Styles */
+        .switch-button:focus {
+            outline: 2px solid var(--secondary-color);
+            background-color: #CCE5FF;
+        }
+
+        a.switch-button:focus {
+            outline: 2px solid var(--secondary-color);
+        }
+    </style>
+    <script>
+        // Toggle Sidebar Function
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Updated Sidebar -->
+    <aside class="sidebar open" aria-label="Sidebar Navigation">
+        <div class="sidebar-header" onclick="toggleSidebar()" role="button" tabindex="0" aria-expanded="true" aria-controls="sidebar-links">
+            <span class="material-symbols-outlined menu-icon" aria-hidden="true">menu</span>
+            <h2>Menu</h2>
+        </div>
+        <ul class="sidebar-links" id="sidebar-links">
+            <!-- "Zurück zum Start" Link unterhalb des "Menu" Headers -->
+            <li class="zurueck-zum-start">
+                <a href="/">
+                    <span class="material-symbols-outlined" aria-hidden="true">home</span>Zurück zum Start
+                </a>
+            </li>
+            <!-- "Main Menu" Header -->
+            <h4>
+                <span>Main Menu</span>
+                <div class="menu-separator"></div>
+            </h4>
+            <li>
+                <a href="{% url 'project_details' project_name %}" {% if request.path == project_name %}class="active"{% endif %}>
+                    <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>LCC-Kosten
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'benchmarking' project_name %}" {% if request.path == '/benchmarking/' %}class="active"{% endif %}>
+                    <span class="material-symbols-outlined" aria-hidden="true">assessment</span>LCC-Benchmarking
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'workflow' project_name %}" {% if request.path == '/workflow/' %}class="active"{% endif %}>
+                    <span class="material-symbols-outlined" aria-hidden="true">description</span>Workflow-Dokumentation
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>
+            LCC-Kosten für {{ project_name }} pro Fahrzeug 
+            <img src="{{ image_url }}" alt="{{ project_name }} Logo" class="logo">
+        </h1>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Stadler_logo.svg/1200px-Stadler_logo.svg.png" alt="Stadler Logo">
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="content">
+
+            <!-- Section Header mit Switch-Button rechts ausgerichtet -->
+            <div class="section-header">
+                LCC-Kosten nach Baugruppen und Tätigkeiten
+                <a href="{% url 'project_details' project_name=project_name %}" class="switch-button">
+                    <span class="icon-circle">
+                        <span class="material-symbols-outlined">swap_horiz</span>
+                    </span>
+                    Wechsel zur Baugruppenansicht
+                </a>
+            </div>
+                    
+            <table class="cost-table" aria-label="LCC-Kosten Tabelle">
+                <thead>
+                    <tr>
+                        <th>DIN Ebene 1</th>
+                        <th>Beschreibung</th>
+                        <th>Inspektion</th>
+                        <th>Wartung</th>
+                        <th>Zustandsermittlung</th>
+                        <th>Revision</th>
+                        <th>Tausch</th>
+                        <th>Betriebsprüfung</th>
+                        <th>Betriebsservice</th>
+                        <th>Vorbereitung</th>
+                        <th>Nachbereitung</th>
+                        <th>Reparatur am Objekt</th>
+                        <th>Gesamtkosten</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in project_data %}
+                    <tr>
+                        <td>{{ row.DIN_Ebene1 }}</td>
+                        <td>{{ row.DIN_Ebene1_Beschreibung }}</td>
+                        <td>{{ row.Inspektion|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Wartung|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Zustandsermittlung|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Revision|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Tausch|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Betriebsprüfung|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Betriebsservice|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Vorbereitung|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Nachbereitung|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Reparatur_am_Objekt|floatformat:0|intcomma }} €</td>
+                        <td>{{ row.Gesamtkosten|floatformat:0|intcomma }} €</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
+
+</body>
+</html>
