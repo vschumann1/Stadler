@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-me8q(mskn3tu4=ce0^&jxg@$8##yngb14y*9wlgz*rosu#oi$l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['stadler.onrender.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['stadler-prototyp.onrender.com', '127.0.0.1', 'localhost']
 
 
 
